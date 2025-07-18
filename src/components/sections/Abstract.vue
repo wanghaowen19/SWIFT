@@ -7,7 +7,7 @@ import abstract from '../mds/abstract.mdx';
     <el-divider />
 
     <el-row justify="center">
-        <el-col :xs="24" :sm="20" :md="16" :lg="12" :xl="12">
+        <el-col :xs="24" :sm="20" :md="16" :lg="12" :xl="12" class="mdx-content">
             <abstract />
         </el-col>
     </el-row>
@@ -16,5 +16,8 @@ import abstract from '../mds/abstract.mdx';
 </template>
 
 <style scoped>
-
+/* 选择摘要内容所在的 el-col 元素并应用两端对齐 */
+.el-col {
+  text-align: justify;
+}
 </style>

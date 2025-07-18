@@ -6,9 +6,9 @@ import Footer from './components/Footer.vue'
 
 export default {
   components: {
-    Header,
+    // Header,
     Main,
-    Footer,
+    // Footer,
   }
 }
 
@@ -31,9 +31,11 @@ export default {
 <style>
 
 h1 {
-  font-family: "MyFont", Verdana, sans-serif;
+  font-family: "Times New Roman", serif;
+  font-weight: bold;
+  color:#94070A;
   letter-spacing: 2px;
-  font-size: 28px;
+  font-size: 32px;
   margin: 0px;
   text-align: center;
 }
@@ -112,6 +114,40 @@ p > img {
   margin: 0 auto;
   border-radius: 10px;
   box-shadow: 1px 1px 4px 1px #afafaf;
+}
+
+/* 图片描述样式 */
+img::after {
+  content: attr(alt);
+  display: block;
+  text-align: center;
+  font-style: italic;
+  color: #666;
+  font-size: 14px;
+  margin-top: 8px;
+  line-height: 1.4;
+  max-width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* 当图片没有alt属性时不显示伪元素 */
+img:not([alt])::after,
+img[alt=""]::after {
+  display: none;
+}
+
+/* 特别针对MDX内容区域的图片 */
+.markdown-content img::after,
+.mdx-content img::after {
+  content: attr(alt);
+  display: block;
+  text-align: center;
+  font-style: italic;
+  color: #666;
+  font-size: 14px;
+  margin-top: 8px;
+  line-height: 1.4;
 }
 
 table {

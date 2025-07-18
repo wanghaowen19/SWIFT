@@ -1,0 +1,35 @@
+# System Overview
+
+
+
+We design a one-stage interaction-aware framework to achieve efficient and distributed multi-quadrotor motion planning. The overall system follows a structured input-to-output pipeline that unifies perception, state encoding, interaction modeling, and trajectory generation into a single network forward pass, as illustrated in Fig. 1.
+
+<div style="text-align: center; margin: 20px 0;">
+  <img src="./picswift/framework_final.png" alt="Fig. 1: Overview of the SWIFT architecture for distributed multi-quadrotor trajectory planning." style="width: 80%; display: block; margin: 0 auto; border-radius: 10px; box-shadow: 1px 1px 4px 1px #afafaf;" />
+  <p style="font-style: italic; color: #666; font-size: 14px; margin-top: 8px; line-height: 1.4;">Fig. 1: Overview of the SWIFT architecture for distributed multi-quadrotor trajectory planning.</p>
+</div>
+
+The planning process begins by uniformly dividing the local depth image into a $M_\varphi \times M_\theta$ spatial grid. Each grid cell corresponds to an anchor motion primitive that defines a specific direction in three-dimensional space, as shown in Fig. 2a. Based on these anchors, the planning network predicts, for each primitive, a set of directional offsets, terminal velocity and acceleration, and a scalar trajectory score. These predictions refine the initial motion primitives into dynamically feasible candidate trajectories, as depicted in Fig. 2b The color of each trajectory reflects its predicted score, where warmer colors indicate higher-quality motions. During execution, the trajectory with the highest score is selected, enabling real-time decision-making without iterative optimization.
+
+<div style="text-align: center; margin: 20px 0;">
+  
+  <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+    <div style="flex: 1; min-width: 300px; max-width: 45%;">
+      <img src="./picswift/imagegrid.png" alt="Initial anchor primitives" style="width: 100%; display: block; margin: 0 auto; border-radius: 10px; box-shadow: 1px 1px 4px 1px #afafaf;" />
+      <p style="font-style: italic; color: #666; font-size: 12px; margin-top: 8px; line-height: 1.4;">(a) Initial anchor primitives</p>
+    </div>
+    <div style="flex: 1; min-width: 300px; max-width: 45%;">
+      <img src="./picswift/imagegrid2.png" alt="Refined primitives" style="width: 100%; display: block; margin: 0 auto; border-radius: 10px; box-shadow: 1px 1px 4px 1px #afafaf;" />
+      <p style="font-style: italic; color: #666; font-size: 12px; margin-top: 8px; line-height: 1.4;">(b) Refined primitives</p>
+    </div>
+  </div>
+  <p style="font-style: italic; color: #666; font-size: 14px; margin-bottom: 15px; line-height: 1.4;">Fig. 2: Discretization and refinement of motion primitives. (a) Primitives originate from fixed anchor directions. (b) The neural network refines each primitive by predicting directional offsets and end-state dynamics. Trajectory colors indicate predicted scores, with warmer colors denoting higher-quality motions. The primitive with the highest score is selected for execution.</p>
+</div>
+
+
+The network architecture integrates information from multiple sources to produce interaction-aware motion predictions. A lightweight ShuffleNet  backbone extracts spatially aligned depth features from the input depth image, ensuring computational efficiency suitable for onboard deployment. In parallel, the motion state of ego quadrotor, including velocity, acceleration, and goal direction, is rotated into the corresponding primitive-aligned frames and embedded as feature inputs. To model inter-agent interactions, neighboring quadrotors periodically broadcast compact intention vectors summarizing their predicted motion trends. A confidence-guided cross-attention module selectively incorporates these neighbor features, attending more strongly to those agents deemed critical based on predicted interaction relevance.
+The fused feature tensor, composed of depth features, ego-motion embeddings, and interaction-aware neighbor features, is processed by a fully convolutional prediction head. In a single forward pass, the network outputs refined motion primitives and associated scores across the entire spatial grid. This one-stage structure enables early anticipation of obstacles and interactions, achieving sub-millisecond inference latency even in densely populated environments.
+
+In addition to trajectory planning, SWIFT incorporates a VIO drift correction mechanism to improve positioning accuracy during real-world operations. A detection network operates in parallel, identifying nearby quadrotors from RGB images and estimating their relative positions. These detections are fused with odometry estimates using a lightweight backend optimizer, allowing accumulated drift to be corrected without requiring external infrastructure or centralized coordination. Through this integrated design, SWIFT enables robust, real-time, and fully decentralized trajectory planning for multi-quadrotor system.
+
+
